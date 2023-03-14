@@ -18,10 +18,10 @@ using cppfloat = double;
 using cppint = size_t;
 #endif
 
-std::map<std::string, int> PRECEDENCE = {
+const std::map<std::string, int> PRECEDENCE = {
     {"+", 2}, {"-", 2}, {"*", 3}, {"/", 3}, {"^", 4}, {"sin", 5}, {"cos", 5}, {"tan", 5}, {"asin", 5}, {"acos", 5}, {"atan", 5}, {"log", 5}, {"pow", 5}, {"fac", 5}, {"rad", 5}, {"deg", 5}};
 
-std::map<std::string, std::string> constants = {
+const std::map<std::string, std::string> constants = {
     {"pi", "3."
            "1415926535897932384626433832795028841971693993751058209749445923078"
            "1640628620899862803482534211706798214808651328230664709384460955058"
@@ -178,7 +178,7 @@ cppfloat evaluate_postfix(Queue<std::string> tokens) {
         auto v = std::find(constants_used.begin(), constants_used.end(), str);
         if (v == constants_used.end())
             return false;
-        stack.push(tofloat(constants[*v]));
+        stack.push(tofloat(constants.find(*v)->second));
         return true;
     };
 
@@ -227,11 +227,11 @@ cppfloat evaluate_postfix(Queue<std::string> tokens) {
         } else if (token == "rad") {
             cppfloat b = stacktop(stack);
             stack.pop();
-            stack.push(b * tofloat(constants["pi"]) / 180);
+            stack.push(b * tofloat(constants.find("pi")->second) / 180);
         } else if (token == "deg") {
             cppfloat b = stacktop(stack);
             stack.pop();
-            stack.push(b * 180 / tofloat(constants["pi"]));
+            stack.push(b * 180 / tofloat(constants.find("pi")->second));
         } else if (token == "fac") {
             // cppint b = stacktop(stack);
             #ifdef USE_BOOST_MP
@@ -272,15 +272,6 @@ Queue<std::string> shunting_yard(std::string expr) {
         std::string token = tokens.front();
         if (isfloat(token) || isConst(token)) { // operand
             output.push(token);
-        } else if (PRECEDENCE.find(token) != PRECEDENCE.end()) { // operator
-            while ((stack.size() > 0 &&
-                    PRECEDENCE.find(stacktop(stack)) != PRECEDENCE.end() &&
-                    PRECEDENCE[token] <= PRECEDENCE[stacktop(stack)]) &&
-                   token != "^") {
-                output.push(stacktop(stack));
-                stack.pop();
-            }
-            stack.push(token);
         } else if (token == "(") {
             stack.push(token);
         } else if (token == ",") {
@@ -295,12 +286,23 @@ Queue<std::string> shunting_yard(std::string expr) {
             }
             stack.pop();
             if (stack.size() > 0) {
-                if (PRECEDENCE[stacktop(stack)] == 5) {
+                if (PRECEDENCE.find(stacktop(stack)) != PRECEDENCE.end() && 
+                         PRECEDENCE.find(stacktop(stack))->second == 5) {
                     output.push(stacktop(stack));
                     stack.pop();
                 }
             }
-        } else if (PRECEDENCE[token] == 5) {
+        } else if (PRECEDENCE.find(token) != PRECEDENCE.end()) { // operator & function
+            if (PRECEDENCE.find(token)->second != 5) {
+                // operator
+                while ((stack.size() > 0 &&
+                        PRECEDENCE.find(stacktop(stack)) != PRECEDENCE.end() &&
+                        PRECEDENCE.find(token)->second <= PRECEDENCE.find(stacktop(stack))->second) &&
+                    token != "^") {
+                    output.push(stacktop(stack));
+                    stack.pop();
+                }
+            }
             stack.push(token);
         } else {
             std::stringstream ss;
@@ -312,8 +314,6 @@ Queue<std::string> shunting_yard(std::string expr) {
         output.push(stacktop(stack));
         stack.pop();
     }
-    std::cout << "Stack  : " << stack.print() << std::endl;
-    std::cout << "Output : " << output.print() << std::endl;
     return output;
 }
 

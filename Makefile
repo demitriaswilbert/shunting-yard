@@ -2,7 +2,7 @@
 TARGET = main
 
 # Optimization
-OPT = -O2
+OPT = -O1
 
 # Build Directory
 BUILD_DIR = build

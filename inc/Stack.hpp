@@ -7,10 +7,26 @@ template <typename T> class Stack {
     SingleNode<T>* m_head;
     size_t m_size;
 
+    void copyFrom(Stack<T>& other) {
+        while (size())
+            pop();
+        for (SingleNode<T>* i = other.begin(); i != NULL; i = i->next())
+            push(i->getElement());
+    }
+
+    void copyFrom(Stack<T>&& other) {
+        while (size())
+            pop();
+        m_head = other.m_head;
+        m_size = other.m_size;
+        other.m_head = NULL;
+        other.m_size = 0;
+    }
+
   public:
     Stack<T>() : m_head(NULL), m_size(0) {}
     Stack<T>(Stack<T>& other) : Stack() { copyFrom(other); }
-    Stack<T>(Stack<T>&& other) : Stack(other) {}
+    Stack<T>(Stack<T>&& other) : Stack() { copyFrom(std::move(other)); }
 
     SingleNode<T>* begin() { return m_head; }
 
@@ -50,13 +66,7 @@ template <typename T> class Stack {
         return ss.str();
     }
     size_t size() const { return m_size; }
-    void copyFrom(Stack<T>& other) {
-        while (size())
-            pop();
-        for (SingleNode<T>* i = other.begin(); i != NULL; i = i->next())
-            push(i->getElement());
-    }
     void operator=(Stack<T>& other) { copyFrom(other); }
-    void operator=(Stack<T>&& other) { copyFrom(other); }
+    void operator=(Stack<T>&& other) { copyFrom(std::move(other)); }
 };
 #endif // STACK_HPP

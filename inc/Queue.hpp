@@ -3,7 +3,7 @@
 #include "linkedlist.hpp"
 #include <bits/stdc++.h>
 template <typename T> class Queue {
-    SingleNode<T>*m_front, *m_back;
+    SingleNode<T> *m_front, *m_back;
     size_t m_size;
 
     void copyFrom(Queue<T>& other) {
@@ -12,11 +12,21 @@ template <typename T> class Queue {
         for (SingleNode<T>* i = other.begin(); i != NULL; i = i->next())
             push(i->getElement());
     }
+
+    void copyFrom(Queue<T>&& other) {
+        while (size())
+            pop();
+        m_front = other.m_front;
+        m_back = other.m_back;
+        m_size = other.m_size;
+        other.m_front = other.m_back = NULL;
+        other.m_size = 0;
+    }
     
   public:
     Queue<T>() : m_front(NULL), m_back(NULL), m_size(0) {}
     Queue(Queue<T>& other) : Queue() { copyFrom(other); }
-    Queue(Queue<T>&& other) : Queue(other) {}
+    Queue(Queue<T>&& other) : Queue() { copyFrom(std::move(other)); }
 
     SingleNode<T>* begin() { return m_front; }
     SingleNode<T>* end() { return m_back; }
@@ -67,7 +77,7 @@ template <typename T> class Queue {
     }
     size_t size() const { return m_size; }
     void operator=(Queue<T>& other) { copyFrom(other); }
-    void operator=(Queue<T>&& other) { copyFrom(other); }
+    void operator=(Queue<T>&& other) { copyFrom(std::move(other)); }
     ~Queue() {
         while (size())
             pop();

@@ -9,14 +9,19 @@ class SingleNode {
     SingleNode *m_next;
 
     public:
-    SingleNode(T _element) : m_element(_element), m_next(NULL) {}
+    // SingleNode(T _element) : m_element(_element), m_next(NULL) {}
+    SingleNode(const T& _element) : m_element(_element), m_next(NULL) {}
+    SingleNode(T&& _element) : m_element(_element), m_next(NULL) {}
     
     SingleNode* next() { return m_next; }
 
     void next(SingleNode* _next) { m_next = _next; }
 
     T& getElement() { return m_element; }
-    void setElement(T _element) { m_element = _element; }
+
+    // void setElement(T _element) { m_element = _element; }
+    void setElement(const T& _element) { m_element = _element; }
+    void setElement(T&& _element) { m_element = _element; }
 };
 
 #endif// LINKEDLIST_HPP
