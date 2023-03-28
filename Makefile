@@ -2,7 +2,7 @@
 TARGET = main
 
 # Optimization
-OPT = -O1
+OPT = -O2
 
 # Build Directory
 BUILD_DIR = build
@@ -13,7 +13,8 @@ CPP_SOURCES = $(wildcard src/*.cpp)
 
 # C header directories
 C_INCLUDES = \
--Iinc
+-Iinc \
+-I/home/demitriaswilbert/boost/include
 # C++ header directories
 CPP_INCLUDES = \
 $(C_INCLUDES)
