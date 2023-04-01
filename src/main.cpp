@@ -167,7 +167,7 @@ Queue<std::string> tokenize(std::string expr) {
             tokens.push(min ? ("-" + expr.substr(i, j - i))
                             : expr.substr(i, j - i));
             i = j;
-        } else if (PRECEDENCE.find(expr.substr(i, 1)) != PRECEDENCE.end()) {
+        } else if (PRECEDENCE.count(expr.substr(i, 1))) {
             tokens.push(expr.substr(i, 1));
             i++;
         } else if (expr[i] == '(' || expr[i] == ')') {
@@ -254,7 +254,6 @@ cppfloat evaluate_postfix(Queue<std::string> tokens) {
     auto checkConstants = [&stack](std::string& str) {
         auto v = std::find(constants_used.begin(), constants_used.end(), str);
         if (v == constants_used.end()) return false;
-        stack.push(tofloat(constants.find(*v)->second));
         return true;
     };
 
@@ -263,7 +262,7 @@ cppfloat evaluate_postfix(Queue<std::string> tokens) {
         if (isfloat(token)) {
             stack.push(tofloat(token));
         } else if (checkConstants(token)) {
-            ;
+            stack.push(tofloat(constants.at(token)));
         } else if (token == "sin") {
             cppfloat tmp = stacktop(stack);
             stack.pop();
@@ -303,11 +302,11 @@ cppfloat evaluate_postfix(Queue<std::string> tokens) {
         } else if (token == "rad") {
             cppfloat b = stacktop(stack);
             stack.pop();
-            stack.push(b * tofloat(constants.find("pi")->second) / 180);
+            stack.push(b * tofloat(constants.at("pi")) / 180);
         } else if (token == "deg") {
             cppfloat b = stacktop(stack);
             stack.pop();
-            stack.push(b * 180 / tofloat(constants.find("pi")->second));
+            stack.push(b * 180 / tofloat(constants.at("pi")));
         } else if (token == "fac") {
 // cppint b = stacktop(stack);
 #ifdef USE_BOOST_MP
@@ -368,20 +367,18 @@ Queue<std::string> shunting_yard(std::string expr) {
             }
             stack.pop();
             if (stack.size() > 0) {
-                if (PRECEDENCE.find(stacktop(stack)) != PRECEDENCE.end() &&
-                    PRECEDENCE.find(stacktop(stack))->second == 5) {
+                if (PRECEDENCE.count(stacktop(stack)) &&
+                    PRECEDENCE.at(stacktop(stack)) == 5) {
                     output.push(stacktop(stack));
                     stack.pop();
                 }
             }
-        } else if (PRECEDENCE.find(token) !=
-                   PRECEDENCE.end()) { // operator & function
-            if (PRECEDENCE.find(token)->second != 5) {
+        } else if (PRECEDENCE.count(token)) { // operator & function
+            if (PRECEDENCE.at(token) != 5) {
                 // operator
                 while ((stack.size() > 0 &&
-                        PRECEDENCE.find(stacktop(stack)) != PRECEDENCE.end() &&
-                        PRECEDENCE.find(token)->second <=
-                            PRECEDENCE.find(stacktop(stack))->second) &&
+                        PRECEDENCE.count(stacktop(stack)) &&
+                        PRECEDENCE.at(token) <= PRECEDENCE.at(stacktop(stack))) &&
                        token != "^") {
                     output.push(stacktop(stack));
                     stack.pop();
