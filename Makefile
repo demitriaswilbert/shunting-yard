@@ -49,7 +49,7 @@ vpath %.c $(sort $(dir $(C_SOURCES)))
 OBJS += $(addprefix $(BUILD_DIR)/, $(notdir $(CPP_SOURCES:.cpp=.o)))
 vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
 
-all : $(TARGET).exe
+all : $(TARGET)
 
 $(BUILD_DIR):
 	mkdir $@
@@ -60,12 +60,12 @@ $(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
 $(BUILD_DIR)/%.o: %.cpp $(BUILD_DIR)
 	$(CXX) -c $(CXXFLAGS) $< -o $@ 
 
-$(TARGET).exe : $(OBJS)
+$(TARGET) : $(OBJS)
 	$(LINK) $(LINKFLAGS) $(OBJS) -o $@
 
-run : $(TARGET).exe
-	./$(TARGET).exe
+run : $(TARGET)
+	./$(TARGET)
 
 clean : 
-	rm -fR $(BUILD_DIR) *.exe
+	rm -fR $(BUILD_DIR) $(TARGET)
 
